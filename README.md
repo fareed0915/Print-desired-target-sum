@@ -1,80 +1,110 @@
-
-// Main file
-import java.util.Scanner;
-import java.io.*; 
-import java.util.Vector;
-import java.util.*;
-
-
-public class Main 
+package classes3;
+import java.util.ArrayList;
+import java.util.Arrays;
+public class Main
 {
-  public static void main(String[] args) 
-  {
-    Scanner scan = new Scanner(System.in);
+   // dp[i][j] is going to store true if sum j is
+   // possible with array elements from 0 to i.
+   static boolean[][] dp;
 
-    int size ;
-    System.out.println("Enter the amount of numbers in the list: ");
-     size = scan.nextInt();
-    System.out.println("\nEnter each number and press enter after inputing each number: ");
+   static void display(ArrayList<Integer> v)
+   {
+       System.out.println(v);
+   }
 
-    int list[] = new int [size] ;
-    for(int i= 0; i<size; i++)
-    {
-      list[i]= scan.nextInt();
-    }
-    System.out.println("\nEnter target sum: ");
+   // A recursive function to print all subsets with the
+   // help of dp[][]. Vector p[] stores current subset.
+   static void printSubsetsRec(int arr[], int i, int sum,
+           ArrayList<Integer> p)
+   {
+       // If we reached end and sum is non-zero. We print
+       // p[] only if arr[0] is equal to sun OR dp[0][sum]
+       // is true.
+       if (i == 0 && sum != 0 && dp[0][sum])
+       {
+           p.add(i);
+           display(p);
+           p.clear();
+           return;
+       }
 
-    int target = scan.nextInt();
-    for(int i: list)
-    {
-       System.out.println(i);
-    }
-      System.out.println();
-      numbers total = new numbers();
-      System.out.println(total.combine(list,target));
-  } 
-}
+       // If sum becomes 0
+       if (i == 0 && sum == 0)
+       {
+           display(p);
+           p.clear();
+           return;
+       }
 
-// second file for second class implimentation
+       // If given sum can be achieved after ignoring
+       // current element.
+       if (dp[i-1][sum])
+       {
+           // Create a new vector to store path
+           ArrayList<Integer> b = new ArrayList<>();
+           b.addAll(p);
+           printSubsetsRec(arr, i-1, sum, b);
+       }
 
-import java.io.*; 
-import java.util.Vector;
-import java.util.*;
+       // If given sum can be achieved after considering
+       // current element.
+       if (sum >= arr[i] && dp[i-1][sum-arr[i]])
+       {
+           p.add(i);
+           printSubsetsRec(arr, i-1, sum-arr[i], p);
+       }
+   }
 
-public class numbers
-{
-  public  List<List<Integer>> combine(int[] array, int target)
-  {
-      List<List<Integer>> result = new ArrayList<List<Integer>>();
-      List<Integer> list = new ArrayList<Integer>();
-      List<Integer> set  = new ArrayList<Integer>();
-      sets(result, list, set, array, target, 0);
-      return result;
-    }
-    private static void sets(List<List<Integer>> storage,
-      List<Integer> list,  List<Integer> set, int[] array, int target,
-        int tw) 
-        { 
-          int total = 0;
-          for (int n: list) 
-            {
-              total += n;
-            } 
-          if (total == target) 
-            {
-              storage.add(new ArrayList<Integer>(set));
-              return;
-            }
- 
-          if (total < target){
-            for (int z = tw; z < array.length; z++)
-                {                   
-                    list.add(array[z]);
-                    set.add(z);
-                    sets(storage, list, set, array, target, z+1);
-                    set.remove(set.size() - 1);
-                    list.remove(list.size() - 1);
-                }
-            }
-        }
+   // Prints all subsets of arr[0..n-1] with sum 0.
+   static void printAllSubsets(int arr[], int n, int sum)
+   {
+       if (n == 0 || sum < 0)
+           return;
+
+       // Sum 0 can always be achieved with 0 elements
+       dp = new boolean[n][sum + 1];
+       for (int i=0; i<n; ++i)
+       {
+           dp[i][0] = true;   
+       }
+
+       // Sum arr[0] can be achieved with single element
+       if (arr[0] <= sum)
+           dp[0][arr[0]] = true;
+
+       // Fill rest of the entries in dp[][]
+       for (int i = 1; i < n; ++i)
+           for (int j = 0; j < sum + 1; ++j)
+               dp[i][j] = (arr[i] <= j) ? (dp[i-1][j] ||
+                       dp[i-1][j-arr[i]])
+                       : dp[i - 1][j];
+               if (dp[n-1][sum] == false)
+               {
+                   System.out.println("There are no subsets with" +
+                           " sum "+ sum);
+                   return;
+               }
+
+               // Now recursively traverse dp[][] to find all
+               // paths from dp[ n-1][sum]
+               ArrayList<Integer> p = new ArrayList<>();
+               printSubsetsRec(arr, n-1, sum, p);
+   }
+
+   //Driver Program to test above functions
+   public static void main(String args[])
+   {
+       int arr[] = {1, 2, 3, 4, 5, 6};
+       int n = arr.length;
+       int sum = 6;
+       System.out.println("Array : "+Arrays.toString(arr));
+       System.out.println("Target : "+sum);
+      
+       System.out.println("Combinations are as below");
+       printAllSubsets(arr, n, sum);
+
+       
+   }
+
+   
 }
